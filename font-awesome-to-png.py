@@ -15,11 +15,30 @@ from os import path, access, R_OK, makedirs
 import Image, ImageFont, ImageDraw
 import re
 
+iconset = "font-awesome"
+#iconset = "elusive"
+
+assets = {
+    "font-awesome" : {
+        "mapping" : "assets/font-awesome/font-awesome.css",
+        "ttf" : "assets/font-awesome/fontawesome-webfont.ttf"
+    },
+    "elusive" : {
+        "mapping" : "assets/elusive-iconfont/elusive-webfont.css",
+        "ttf" : "assets/elusive-iconfont/Elusive-Icons.ttf"
+    } 
+}
+
 icons = {}
 
-def load_icon_mapping(fname = "font-awesome.css"):
+def load_icon_mapping():
+    global assets
+    global iconset
+
+    fname = assets[iconset]["mapping"]
     f = open(fname, "r")
     p = re.compile("\.icon-(.*):before(.*)(f...)\"")
+    #p = re.compile("\.icon-(.*):before(.*)(e...)\"")
     icons = {}
 
     while True:
@@ -40,7 +59,10 @@ class ListAction(argparse.Action):
             print icon
         exit(0)
 
-def export_icon(icon, size, filename, font, color):
+def export_icon(icon, size, filename, color):
+    global iconset
+    global assets
+    font = assets[iconset]["ttf"]
     image = Image.new("RGBA", (size, size), color=(0,0,0,0))
 
     draw = ImageDraw.Draw(image)
@@ -82,7 +104,7 @@ def main():
     parser.add_argument("--filename", type=str,
             help="The name of the output file. If all files are exported, it is " +
             "used as a prefix.")
-    parser.add_argument("--font", type=str, default="fontawesome-webfont.ttf",
+    parser.add_argument("--font", type=str, default="assets/font-awesome/fontawesome-webfont.ttf",
             help="Font file to use (default: fontawesome-webfont.ttf)")
     parser.add_argument("--list", nargs=0, action=ListAction,
             help="List available icon names and exit")
@@ -95,9 +117,9 @@ def main():
     font = args.font
     color = args.color
 
+    global iconset
     global icons
     icons = load_icon_mapping()
-    print icons
     if args.font:
         if not path.isfile(args.font) or not access(args.font, R_OK):
             print >> sys.stderr, ("Error: Font file (%s) can't be opened"
@@ -122,7 +144,7 @@ def main():
                 print >> sys.stderr, "Error: Unknown icon name (%s)" % (icon)
                 sys.exit(1)
 
-    OUTDIR = "gen/"
+    OUTDIR = "gen-%s/" % iconset
     if not path.exists(OUTDIR):
         makedirs(OUTDIR)
 
@@ -142,7 +164,7 @@ def main():
         print("Exporting icon \"%s\" as %s (%ix%i pixels)" %
                 (icon, filename, size, size))
 
-        export_icon(icon, size, filename, font, color)
+        export_icon(icon, size, filename, color)
 
 main()
 
