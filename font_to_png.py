@@ -126,8 +126,6 @@ def main(_iconset = "font-awesome"):
     parser.add_argument("--filename", type=str,
             help="The name of the output file. If all files are exported, it is " +
             "used as a prefix.")
-    parser.add_argument("--font", type=str, default="assets/font-awesome/fontawesome-webfont.ttf",
-            help="Font file to use (default: fontawesome-webfont.ttf)")
     parser.add_argument("--list", nargs=0, action=ListAction,
             help="List available icon names and exit")
     parser.add_argument("--size", type=int, default=16,
@@ -136,7 +134,6 @@ def main(_iconset = "font-awesome"):
     args = parser.parse_args()
     icon = args.icon
     size = args.size
-    font = args.font
     color = args.color
 
     global iconset
@@ -144,11 +141,6 @@ def main(_iconset = "font-awesome"):
 
     iconset = _iconset
     icons = load_icon_mapping()
-    if args.font:
-        if not path.isfile(args.font) or not access(args.font, R_OK):
-            print >> sys.stderr, ("Error: Font file (%s) can't be opened"
-                    % (args.font))
-            exit(1)
 
     if args.icon == [ "ALL" ]:
         # Export all icons
