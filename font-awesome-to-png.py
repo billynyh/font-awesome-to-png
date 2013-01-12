@@ -15,17 +15,23 @@ from os import path, access, R_OK, makedirs
 import Image, ImageFont, ImageDraw
 import re
 
+DEBUG = False
+
 iconset = "font-awesome"
-#iconset = "elusive"
+iconset = "elusive"
 
 assets = {
     "font-awesome" : {
         "mapping" : "assets/font-awesome/font-awesome.css",
-        "ttf" : "assets/font-awesome/fontawesome-webfont.ttf"
+        "ttf" : "assets/font-awesome/fontawesome-webfont.ttf",
+        "canvas_ratio" : (1,1),
+        "pattern" : "\.icon-(.*):before(.*)(f...)\""
     },
     "elusive" : {
         "mapping" : "assets/elusive-iconfont/elusive-webfont.css",
-        "ttf" : "assets/elusive-iconfont/Elusive-Icons.ttf"
+        "ttf" : "assets/elusive-iconfont/Elusive-Icons.ttf",
+        "canvas_ratio" : (20, 20),
+        "pattern" : "\.icon-(.*):before(.*)(e...)\""
     } 
 }
 
@@ -37,8 +43,7 @@ def load_icon_mapping():
 
     fname = assets[iconset]["mapping"]
     f = open(fname, "r")
-    p = re.compile("\.icon-(.*):before(.*)(f...)\"")
-    #p = re.compile("\.icon-(.*):before(.*)(e...)\"")
+    p = re.compile(assets[iconset]["pattern"])
     icons = {}
 
     while True:
@@ -63,35 +68,45 @@ def export_icon(icon, size, filename, color):
     global iconset
     global assets
     font = assets[iconset]["ttf"]
-    image = Image.new("RGBA", (size, size), color=(0,0,0,0))
+
+    canvas_ratio = assets[iconset]["canvas_ratio"]
+    canvas_size = (size * canvas_ratio[0], size * canvas_ratio[1])
+    image = Image.new("RGBA", canvas_size, color=(0,0,0,0))
 
     draw = ImageDraw.Draw(image)
 
     # Initialize font
-    font = ImageFont.truetype(font, size)
+    font = ImageFont.truetype(font, size, encoding="unic")
 
     # Determine the dimensions of the icon
     width,height = draw.textsize(icons[icon], font=font)
 
-    draw.text(((size - width) / 2, (size - height) / 2), icons[icon],
-            font=font, fill=color)
+    if DEBUG:
+        print "%d %d" % (width, height)
+
+    x,y  = ( (canvas_size[0]-width)/2, (canvas_size[1]-height)/2 )
+    draw.text((x, y), icons[icon], font=font, fill=color)
 
     # Get bounding box
     bbox = image.getbbox()
+    if DEBUG:
+        print bbox
 
     if bbox:
         image = image.crop(bbox)
 
-    borderw = (size - (bbox[2] - bbox[0])) / 2
-    borderh = (size - (bbox[3] - bbox[1])) / 2
+        borderw = (size - (bbox[2] - bbox[0])) / 2
+        borderh = (size - (bbox[3] - bbox[1])) / 2
 
-    # Create background image
-    bg = Image.new("RGBA", (size, size), (0,0,0,0))
+        # Create background image
+        bg = Image.new("RGBA", (size, size), (0,0,0,0))
 
-    bg.paste(image, (borderw,borderh))
+        bg.paste(image, (borderw,borderh))
 
-    # Save file
-    bg.save(filename)
+        # Save file
+        bg.save(filename)
+    else:
+        print "Error - bbox is None"
 
 def main():
     parser = argparse.ArgumentParser(
@@ -163,8 +178,9 @@ def main():
         filename = OUTDIR + filename
         print("Exporting icon \"%s\" as %s (%ix%i pixels)" %
                 (icon, filename, size, size))
-
+        
         export_icon(icon, size, filename, color)
 
-main()
+if __name__=="__main__":
+    main()
 
