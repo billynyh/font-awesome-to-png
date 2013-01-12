@@ -15,7 +15,8 @@ from os import path, access, R_OK, makedirs
 import Image, ImageFont, ImageDraw
 import re
 
-DEBUG = False
+DEBUG = True
+#DEBUG = False
 
 iconset = "font-awesome"
 iconset = "elusive"
@@ -98,6 +99,12 @@ def export_icon(icon, size, filename, color):
         borderw = (size - (bbox[2] - bbox[0])) / 2
         borderh = (size - (bbox[3] - bbox[1])) / 2
 
+        borderw = max(0, borderw)
+        borderh = max(0, borderh)
+
+        if DEBUG:
+            print (borderw, borderh)
+
         # Create background image
         bg = Image.new("RGBA", (size, size), (0,0,0,0))
 
@@ -108,7 +115,7 @@ def export_icon(icon, size, filename, color):
     else:
         print "Error - bbox is None"
 
-def main():
+def main(_iconset = "font-awesome"):
     parser = argparse.ArgumentParser(
             description="Exports Font Awesome icons as PNG images.")
 
@@ -134,6 +141,8 @@ def main():
 
     global iconset
     global icons
+
+    iconset = _iconset
     icons = load_icon_mapping()
     if args.font:
         if not path.isfile(args.font) or not access(args.font, R_OK):
