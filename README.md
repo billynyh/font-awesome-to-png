@@ -23,7 +23,8 @@ of specified size.
       --list               List available icon names and exit
       --size SIZE          Icon size in pixels (default: 16)
 
-    you can also use elusive.py for [Elusive Icons] (http://aristath.github.com/elusive-iconfont/)
+
+You can also use elusive.py for [Elusive Icons] (http://aristath.github.com/elusive-iconfont/)
 
 To use the program, you need the Font Awesome TTF file, which is available in
 [Font Awesome Github repository] (https://github.com/FortAwesome/Font-Awesome).
