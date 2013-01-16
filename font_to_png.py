@@ -61,6 +61,7 @@ class ListAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         for iconset in [FONT_AWESOME, ELUSIVE]:
             print iconset
+            icons = load_icon_mapping(assets[iconset])
             for icon in sorted(icons.keys()):
                 print "  " + icon
         exit(0)
@@ -71,11 +72,13 @@ def new_canvas_image(config, size):
     image = Image.new("RGBA", canvas_size, color=(0,0,0,0))
     return image
 
-def export_icon(config, char, size, filename, color, image=None):
+def export_icon(config, char, size, filename, color, image=None, outter_size=None):
     font = config["ttf"]
 
     if image is None:
         image = new_canvas_image(config, size)
+    if outter_size is None:
+        outter_size = size
 
     draw = ImageDraw.Draw(image)
 
@@ -101,8 +104,8 @@ def export_icon(config, char, size, filename, color, image=None):
     if bbox:
         image = image.crop(bbox)
 
-        borderw = (size - (bbox[2] - bbox[0])) / 2
-        borderh = (size - (bbox[3] - bbox[1])) / 2
+        borderw = (outter_size - (bbox[2] - bbox[0])) / 2
+        borderh = (outter_size - (bbox[3] - bbox[1])) / 2
 
         borderw = max(0, borderw)
         borderh = max(0, borderh)
@@ -111,7 +114,7 @@ def export_icon(config, char, size, filename, color, image=None):
             print (borderw, borderh)
 
         # Create background image
-        bg = Image.new("RGBA", (size, size), (0,0,0,0))
+        bg = Image.new("RGBA", (outter_size, outter_size), (0,0,0,0))
 
         bg.paste(image, (borderw,borderh))
 
