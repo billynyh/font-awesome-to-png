@@ -18,17 +18,20 @@ import re
 DEBUG = True
 #DEBUG = False
 
-iconset = "font-awesome"
-iconset = "elusive"
+#iconset = "font-awesome"
+#iconset = "elusive"
+
+FONT_AWESOME = "font-awesome"
+ELUSIVE = "elusive"
 
 assets = {
-    "font-awesome" : {
+    FONT_AWESOME : {
         "mapping" : "assets/font-awesome/font-awesome.css",
         "ttf" : "assets/font-awesome/fontawesome-webfont.ttf",
         "canvas_ratio" : (1,1),
         "pattern" : "\.icon-(.*):before(.*)(f...)\""
     },
-    "elusive" : {
+    ELUSIVE : {
         "mapping" : "assets/elusive-iconfont/elusive-webfont.css",
         "ttf" : "assets/elusive-iconfont/Elusive-Icons.ttf",
         "canvas_ratio" : (20, 20),
@@ -36,15 +39,10 @@ assets = {
     } 
 }
 
-icons = {}
-
-def load_icon_mapping():
-    global assets
-    global iconset
-
-    fname = assets[iconset]["mapping"]
+def load_icon_mapping(config):
+    fname = config["mapping"]
     f = open(fname, "r")
-    p = re.compile(assets[iconset]["pattern"])
+    p = re.compile(config["pattern"])
     icons = {}
 
     while True:
@@ -61,18 +59,23 @@ def load_icon_mapping():
 
 class ListAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        for icon in sorted(icons.keys()):
-            print icon
+        for iconset in [FONT_AWESOME, ELUSIVE]:
+            print iconset
+            for icon in sorted(icons.keys()):
+                print "  " + icon
         exit(0)
 
-def export_icon(icon, size, filename, color):
-    global iconset
-    global assets
-    font = assets[iconset]["ttf"]
-
-    canvas_ratio = assets[iconset]["canvas_ratio"]
+def new_canvas_image(config, size):
+    canvas_ratio = config["canvas_ratio"]
     canvas_size = (size * canvas_ratio[0], size * canvas_ratio[1])
     image = Image.new("RGBA", canvas_size, color=(0,0,0,0))
+    return image
+
+def export_icon(config, char, size, filename, color, image=None):
+    font = config["ttf"]
+
+    if image is None:
+        image = new_canvas_image(config, size)
 
     draw = ImageDraw.Draw(image)
 
@@ -80,13 +83,15 @@ def export_icon(icon, size, filename, color):
     font = ImageFont.truetype(font, size, encoding="unic")
 
     # Determine the dimensions of the icon
-    width,height = draw.textsize(icons[icon], font=font)
+    width,height = draw.textsize(char, font=font)
 
     if DEBUG:
         print "%d %d" % (width, height)
 
+    canvas_ratio = config["canvas_ratio"]
+    canvas_size = (size * canvas_ratio[0], size * canvas_ratio[1])
     x,y  = ( (canvas_size[0]-width)/2, (canvas_size[1]-height)/2 )
-    draw.text((x, y), icons[icon], font=font, fill=color)
+    draw.text((x, y), char, font=font, fill=color)
 
     # Get bounding box
     bbox = image.getbbox()
@@ -114,8 +119,11 @@ def export_icon(icon, size, filename, color):
         bg.save(filename)
     else:
         print "Error - bbox is None"
+    # clear image
+    draw.rectangle(bbox, fill=(0,0,0,0))
 
-def main(_iconset = "font-awesome"):
+
+def main(iconset = "font-awesome"):
     parser = argparse.ArgumentParser(
             description="Exports Font Awesome icons as PNG images.")
 
@@ -136,11 +144,8 @@ def main(_iconset = "font-awesome"):
     size = args.size
     color = args.color
 
-    global iconset
-    global icons
-
-    iconset = _iconset
-    icons = load_icon_mapping()
+    config = assets[iconset]
+    icons = load_icon_mapping(config)
 
     if args.icon == [ "ALL" ]:
         # Export all icons
@@ -164,6 +169,7 @@ def main(_iconset = "font-awesome"):
     if not path.exists(OUTDIR):
         makedirs(OUTDIR)
 
+    dummy_image = new_canvas_image(config, size)
 
     for icon in selected_icons:
         if len(selected_icons) > 1:
@@ -180,7 +186,7 @@ def main(_iconset = "font-awesome"):
         print("Exporting icon \"%s\" as %s (%ix%i pixels)" %
                 (icon, filename, size, size))
         
-        export_icon(icon, size, filename, color)
+        export_icon(config, icons[icon], size, filename, color, image=dummy_image)
 
 if __name__=="__main__":
     main()
