@@ -15,18 +15,20 @@ DENSITY = [
 ]
 
 LIST = [
-  "play", "fire", "beaker", "bell"
+  #"play", "fire", "beaker", "bell"
+  "chevron-left"
 ]
 
 MDPI = 1
 HDPI = 1.5
 XHDPI = 2
 
-color1 = color_hex_to_tuple("#0951B5", (int)(256*0.8))
-color2 = color_hex_to_tuple("#0951B5", (int)(256*0.3))
+color1 = color_hex_to_tuple("#eaeaea", (int)(256*0.8))
+color2 = color_hex_to_tuple("#eaeaea", (int)(256*0.3))
 
 def main():
-    config = assets[FONT_AWESOME]
+    #config = assets[FONT_AWESOME]
+    config = assets[ELUSIVE]
     icons = load_icon_mapping(config)
 
     for d in DENSITY:

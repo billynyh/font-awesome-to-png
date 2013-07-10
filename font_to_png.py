@@ -42,6 +42,25 @@ assets = {
 def load_icon_mapping(config):
     fname = config["mapping"]
     f = open(fname, "r")
+    p = re.compile(config["pattern"], re.MULTILINE)
+    icons = {}
+    ss = f.read()
+
+    ss = ss.replace("{\n", "{")
+    l = ss.splitlines()
+    for s in l:
+        m = p.match(s)
+        if m:
+            key = m.group(1)
+            value = m.group(3)
+            value = unichr(int(value, 16))
+            icons[key] = value
+
+    return icons
+
+def load_icon_mapping_bak(config):
+    fname = config["mapping"]
+    f = open(fname, "r")
     p = re.compile(config["pattern"])
     icons = {}
 
