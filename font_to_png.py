@@ -160,11 +160,17 @@ def main(iconset = "font-awesome"):
             help="List available icon names and exit")
     parser.add_argument("--size", type=int, default=16,
             help="Icon size in pixels (default: 16)")
+    parser.add_argument("--outter", type=int, default=16,
+            help="Outter size in pixels (default: 16)")
+    parser.add_argument("--outdir", type=str, default=None,
+            help="outdir")
 
     args = parser.parse_args()
     icon = args.icon
     size = args.size
+    outter_size = args.outter
     color = args.color
+    OUTDIR = args.outdir
 
     config = assets[iconset]
     icons = load_icon_mapping(config)
@@ -186,8 +192,10 @@ def main(iconset = "font-awesome"):
             else:
                 print >> sys.stderr, "Error: Unknown icon name (%s)" % (icon)
                 sys.exit(1)
-
-    OUTDIR = "gen-%s/" % iconset
+    if OUTDIR is None:
+        OUTDIR = "gen-%s/" % iconset
+    if not OUTDIR.endswith("/"):
+        OUTDIR = OUTDIR + "/"
     if not path.exists(OUTDIR):
         makedirs(OUTDIR)
 
@@ -208,7 +216,7 @@ def main(iconset = "font-awesome"):
         print("Exporting icon \"%s\" as %s (%ix%i pixels)" %
                 (icon, filename, size, size))
         
-        export_icon(config, icons[icon], size, filename, color, image=dummy_image)
+        export_icon(config, icons[icon], size, filename, color, image=dummy_image, outter_size=outter_size)
 
 if __name__=="__main__":
     main()
