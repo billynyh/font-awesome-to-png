@@ -91,11 +91,11 @@ def new_canvas_image(config, size):
     image = Image.new("RGBA", canvas_size, color=(0,0,0,0))
     return image
 
-def export_icon(config, char, size, filename, color, image=None, outter_size=None):
+def export_icon(config, char, size, filename, color, image=None, outter_size=None, shadow=False):
     img = get_icon_image(config, char, size, color, image, outter_size)
     img.save(filename)
 
-def get_icon_image(config, char, size, color, image=None, outter_size=None):
+def get_icon_image(config, char, size, color, image=None, outter_size=None, shadow=False):
     font = config["ttf"]
 
     if image is None:
@@ -117,6 +117,8 @@ def get_icon_image(config, char, size, color, image=None, outter_size=None):
     canvas_ratio = config["canvas_ratio"]
     canvas_size = (size * canvas_ratio[0], size * canvas_ratio[1])
     x,y  = ( (canvas_size[0]-width)/2, (canvas_size[1]-height)/2 )
+    if shadow:
+        draw.text((x+2, y+2), char, font=font, fill="#222222")
     draw.text((x, y), char, font=font, fill=color)
 
     # Get bounding box
