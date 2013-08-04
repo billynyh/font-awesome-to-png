@@ -92,6 +92,10 @@ def new_canvas_image(config, size):
     return image
 
 def export_icon(config, char, size, filename, color, image=None, outter_size=None):
+    img = get_icon_image(config, char, size, color, image, outter_size)
+    img.save(filename)
+
+def get_icon_image(config, char, size, color, image=None, outter_size=None):
     font = config["ttf"]
 
     if image is None:
@@ -138,12 +142,13 @@ def export_icon(config, char, size, filename, color, image=None, outter_size=Non
         bg.paste(image, (borderw,borderh))
 
         # Save file
-        bg.save(filename)
+        #bg.save(filename)
+
     else:
         print "Error - bbox is None"
     # clear image
     draw.rectangle(bbox, fill=(0,0,0,0))
-
+    return bg
 
 def main(iconset = "font-awesome"):
     parser = argparse.ArgumentParser(
